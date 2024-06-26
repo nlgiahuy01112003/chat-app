@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #chat {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #messages li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        #form {
+            display: flex;
+            margin-top: 20px;
+        }
+        #message {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #decryptButton {
+            background-color: #008CBA;
+            display: block;
+            margin: 15px auto 0;
+        }
+        #decryptButton:hover {
+            background-color: #007B9A;
+        }
+    </style>
+</head>
+
+</head>
+<body>
+    <div id="chat">
+        <h2>Chat Room: <%= room %></h2>
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="message" autocomplete="off" /><button>Send</button>
+        </form>
+        <button id="decryptButton">Decrypt Message</button>
+    </div>
+    <script>
+        const socket = io();
+
+        socket.emit('join room', '<%= room %>');
+
+        document.getElementById('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageInput = document.getElementById('message');
+            socket.emit('chat message', {
+                user_name: '<%= user_name %>',
+                message_context: messageInput.value,
+                room: '<%= room %>'
+            });
+            messageInput.value = '';
+            return false;
+        });
+
+        document.getElementById('decryptButton').addEventListener('click', function() {
+            const lastMessage = document.querySelector('#messages li:last-child');
+            if (lastMessage) {
+                const encryptedMessage = lastMessage.textContent.split(': ')[1];
+                socket.emit('decrypt message', {
+                    user_name: '<%= user_name %>',
+                    message_context: encryptedMessage,
+                    room: '<%= room %>'
+                });
+            }
+        });
+
+        socket.on('chat message', function(msg) {
+            const item = document.createElement('li');
+            item.textContent = msg.user_name + ': ' + msg.message_context;
+            document.getElementById('messages').appendChild(item);
+        });
+
+        socket.on('decrypted message', function(msg) {
+            const item = document.createElement('li');
+            item.textContent = 'Decrypted: ' + msg.message_context;
+            document.getElementById('messages').appendChild(item);
+        });
+    </script>
+</body>
+</html>
