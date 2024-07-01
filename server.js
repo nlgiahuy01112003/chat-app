@@ -158,10 +158,11 @@ io.on('connection', (socket) => {
         socket.join(room);
         try {
             // Fetch old messages for the room
-            const messagesResult = await db.query('SELECT user_name, message_context FROM message WHERE room_id = $1 ORDER BY timestamp', [room]);
+            const messagesResult = await db.query('SELECT user_name, message_context, timestamp FROM message WHERE room_id = $1 ORDER BY timestamp', [room]);
             const messages = messagesResult.rows.map(msg => ({
                 user_name: msg.user_name,
-                message_context: decryptRSA(decrypt3DES(decryptCaesar(msg.message_context)))
+                message_context: decryptRSA(decrypt3DES(decryptCaesar(msg.message_context))),
+                timestamp: msg.timestamp
             }));
             // Send old messages to the client
             socket.emit('old messages', messages);
@@ -174,8 +175,9 @@ io.on('connection', (socket) => {
         const { user_name, message_context, room } = msg;
         try {
             const encryptedMessage = encryptCaesar(encrypt3DES(encryptRSA(message_context)));
-            await db.query('INSERT INTO message (user_name, message_context, room_id) VALUES ($1, $2, $3)', [user_name, encryptedMessage, room]);
-            io.to(room).emit('chat message', { user_name, message_context: encryptedMessage });
+            const result = await db.query('INSERT INTO message (user_name, message_context, room_id) VALUES ($1, $2, $3) RETURNING timestamp', [user_name, encryptedMessage, room]);
+            const timestamp = result.rows[0].timestamp;
+            io.to(room).emit('chat message', { user_name, message_context: encryptedMessage, timestamp });
         } catch (err) {
             console.error('Error sending chat message:', err);
         }
