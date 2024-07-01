@@ -11,24 +11,29 @@ CREATE TABLE user_info (
     department VARCHAR(255)
 );
 
--- Table for rooms
+
+-- Table for room
 CREATE TABLE room (
     id SERIAL PRIMARY KEY,
     room_name VARCHAR(255) NOT NULL,
-    created_by VARCHAR(255)
+    created_by VARCHAR(255) NOT NULL,
+    FOREIGN KEY (created_by) REFERENCES "user" (user_name)
 );
 
--- Table for room members
+-- Table for room member
 CREATE TABLE room_member (
-    id SERIAL PRIMARY KEY,
-    room_id INT REFERENCES room(id),
-    user_name VARCHAR(255) REFERENCES "user"(user_name)
+    room_id INTEGER REFERENCES room(id),
+    user_name VARCHAR(255) REFERENCES "user" (user_name),
+    PRIMARY KEY (room_id, user_name)
 );
 
--- Table for messages
+-- Table for message
 CREATE TABLE message (
     id SERIAL PRIMARY KEY,
-    user_name VARCHAR(255) REFERENCES "user"(user_name),
-    message_context TEXT NOT NULL,
-    room_id INT REFERENCES room(id)
+    room_id INTEGER REFERENCES room(id),
+    user_name VARCHAR(255),
+    message_context TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+

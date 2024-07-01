@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Chat</title>
-    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <link rel="stylesheet" type="text/css" href="../public/styles.css">
     <script src="/socket.io/socket.io.js"></script>
     <style>
         body {
@@ -67,8 +67,6 @@
         }
     </style>
 </head>
-
-</head>
 <body>
     <div id="chat">
         <h2>Chat Room: <%= room %></h2>
@@ -77,6 +75,7 @@
             <input id="message" autocomplete="off" /><button>Send</button>
         </form>
         <button id="decryptButton">Decrypt Message</button>
+        <button id="readOldMessagesButton">Read Old Messages</button>
     </div>
     <script>
         const socket = io();
@@ -107,6 +106,10 @@
             }
         });
 
+        document.getElementById('readOldMessagesButton').addEventListener('click', function() {
+            socket.emit('read old messages', { room: '<%= room %>' });
+        });
+
         socket.on('chat message', function(msg) {
             const item = document.createElement('li');
             item.textContent = msg.user_name + ': ' + msg.message_context;
@@ -117,6 +120,14 @@
             const item = document.createElement('li');
             item.textContent = 'Decrypted: ' + msg.message_context;
             document.getElementById('messages').appendChild(item);
+        });
+
+        socket.on('old messages', function(messages) {
+            messages.forEach(msg => {
+                const item = document.createElement('li');
+                item.textContent = msg.user_name + ': ' + msg.message_context;
+                document.getElementById('messages').appendChild(item);
+            });
         });
     </script>
 </body>

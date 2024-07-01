@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Register</title>
-        <style>
+    <link rel="stylesheet" type="text/css" href="../public/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -51,7 +53,6 @@
             text-decoration: underline;
         }
     </style>
-
 </head>
 <body>
     <form action="/register" method="post">
@@ -60,8 +61,7 @@
         <input type="text" name="name" placeholder="Name" required><br>
         <input type="text" name="department" placeholder="Department" required><br>
         <button type="submit">Register</button>
-        <a href="/login" class="login-link">Login</a>
+        <a href="/login">Login</a>
     </form>
-
 </body>
 </html>
