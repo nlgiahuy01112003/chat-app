@@ -29,6 +29,9 @@ const db = new pg.Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
+    ssl: {
+        rejectUnauthorized: false, // Cần thiết cho chứng chỉ tự ký
+    },
 });
 
 db.connect((err) => {
